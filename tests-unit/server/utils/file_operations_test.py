@@ -40,3 +40,40 @@ def test_walk_directory_file_size(temp_directory):
     files = [item for item in result if is_file_info(item)]
     for file in files:
         assert file['size'] > 0  # Assuming all files have some content
+
+def test_walk_directory_with_nested_structure(tmp_path):
+    # Create a nested directory structure
+    nested_dir = tmp_path / "nested"
+    nested_dir.mkdir()
+    (nested_dir / "file4.txt").write_text("content4")
+    (nested_dir / "subdir").mkdir()
+    (nested_dir / "subdir" / "file5.txt").write_text("content5")
+
+    result: List[FileSystemItem] = FileSystemOperations.walk_directory(str(tmp_path))
+
+    assert len(result) == 7  # 3 directories and 4 files
+
+    files = [item for item in result if item['type'] == 'file']
+    dirs = [item for item in result if item['type'] == 'directory']
+
+    assert len(files) == 4
+    assert len(dirs) == 3
+
+    file_names = {file['name'] for file in files}
+    assert file_names == {'file3.txt', 'file1.txt', 'file2.txt', 'file4.txt', 'file5.txt'}
+
+    dir_names = {dir['name'] for dir in dirs}
+    assert dir_names == {'dir1', 'dir2', 'nested', 'subdir'}
+
+def test_walk_directory_symlink(temp_directory):
+    # Create a symlink to one of the directories
+    symlink_path = temp_directory / "symlink_to_dir1"
+    symlink_path.symlink_to(temp_directory / "dir1")
+
+    result: List[FileSystemItem] = FileSystemOperations.walk_directory(str(temp_directory))
+
+    assert len(result) >= 5  # Should include the original items plus the symlink
+
+    symlinks = [item for item in result if item['type'] == 'symlink']
+    assert len(symlinks) == 1
+    assert symlinks[0]['name'] == 'symlink_to_dir1'
