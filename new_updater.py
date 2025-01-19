@@ -23,15 +23,19 @@ def update_windows_updater():
             if not f.read().startswith(expected_start):
                 shutil.copy(updater_path, dest_updater_path)
 
-                # Update dependencies batch file
-                update_dependencies(dest_bat_deps_path)
+            # Update dependencies batch file
+            update_dependencies(dest_bat_deps_path)
 
-                # Copy the main batch file
-                shutil.copy(bat_path, dest_bat_path)
-                print("Updated the windows standalone package updater.")  # noqa: T201
+            # Copy the main batch file
+            shutil.copy(bat_path, dest_bat_path)
+        message = (
+            "Updated the windows "
+            "standalone package updater."
+        )
+        print(message)  # noqa: T201
 
     except (FileNotFoundError, IOError) as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")  # noqa: T201
 
 
 def update_dependencies(dest_bat_deps_path):
@@ -47,4 +51,4 @@ def update_dependencies(dest_bat_deps_path):
             f.write(updated_contents)
             f.truncate()  # Truncate the file to the new size
     except (FileNotFoundError, IOError) as e:
-        print(f"An error occurred while updating dependencies: {e}")
+        print(f"An error occurred while updating traces: {e}")  # noqa: T201
